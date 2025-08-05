@@ -197,6 +197,8 @@ export const CVUpload: React.FC<CVUploadProps> = ({ currentCV, onCVUpdate }) => 
                 accept=".pdf,.doc,.docx"
                 onChange={handleFileSelect}
                 className="hidden"
+                aria-label="Upload new CV file"
+                title="Upload new CV file"
               />
               <Button
                 variant="outline"
@@ -219,6 +221,8 @@ export const CVUpload: React.FC<CVUploadProps> = ({ currentCV, onCVUpdate }) => 
                 accept=".pdf,.doc,.docx"
                 onChange={handleFileSelect}
                 className="hidden"
+                aria-label="Upload CV file"
+                title="Upload CV file"
               />
               <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">Upload your CV</h3>
