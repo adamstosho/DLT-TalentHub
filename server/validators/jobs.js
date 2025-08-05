@@ -1,6 +1,5 @@
 const { body, param, query, validationResult } = require('express-validator');
 
-// Validation result handler
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -20,7 +19,6 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Create job validation
 const validateCreateJob = [
   body('title')
     .trim()
@@ -127,7 +125,6 @@ const validateCreateJob = [
   handleValidationErrors
 ];
 
-// Update job validation
 const validateUpdateJob = [
   param('jobId')
     .isMongoId()
@@ -153,7 +150,6 @@ const validateUpdateJob = [
   handleValidationErrors
 ];
 
-// Job application validation
 const validateJobApplication = [
   param('jobId')
     .isMongoId()
@@ -168,7 +164,6 @@ const validateJobApplication = [
   handleValidationErrors
 ];
 
-// Search jobs validation
 const validateSearchJobs = [
   query('q')
     .optional()

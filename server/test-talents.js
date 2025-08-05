@@ -5,7 +5,6 @@ require('dotenv').config();
 
 async function testTalents() {
   try {
-    // Connect to MongoDB
     let mongoURI = process.env.MONGO_URI;
     if (!mongoURI) {
       mongoURI = 'mongodb://localhost:27017/dlt-talenthub';
@@ -14,19 +13,15 @@ async function testTalents() {
     await mongoose.connect(mongoURI);
     console.log('Connected to MongoDB');
 
-    // Check if there are any talent profiles
     const talentCount = await Talent.countDocuments();
     console.log(`Total talent profiles: ${talentCount}`);
 
-    // Check public talent profiles
     const publicTalents = await Talent.countDocuments({ isPublic: true });
     console.log(`Public talent profiles: ${publicTalents}`);
 
-    // Check complete talent profiles
     const completeTalents = await Talent.countDocuments({ isProfileComplete: true });
     console.log(`Complete talent profiles: ${completeTalents}`);
 
-    // List all talent profiles
     const allTalents = await Talent.find().populate('user', 'firstName lastName email');
     console.log('\nAll talent profiles:');
     allTalents.forEach((talent, index) => {
@@ -38,11 +33,9 @@ async function testTalents() {
       console.log('');
     });
 
-    // Check if we need to create test data
     if (talentCount === 0) {
       console.log('No talent profiles found. Creating test data...');
       
-      // Find some users to create talent profiles for
       const users = await User.find({ role: 'talent' }).limit(5);
       
       if (users.length === 0) {
@@ -99,8 +92,7 @@ async function testTalents() {
   } catch (error) {
     console.error('Error:', error);
   } finally {
-    await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    await mongoose.connection.close();
   }
 }
 

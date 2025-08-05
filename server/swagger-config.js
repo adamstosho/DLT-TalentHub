@@ -2,7 +2,6 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const path = require('path');
 
-// Swagger configuration options
 const options = {
   definition: {
     openapi: '3.0.3',
@@ -117,10 +116,8 @@ const options = {
   ]
 };
 
-// Generate Swagger specification
 const specs = swaggerJsdoc(options);
 
-// Swagger UI options
 const swaggerUiOptions = {
   explorer: true,
   customCss: `
@@ -159,11 +156,9 @@ const swaggerUiOptions = {
     showCommonExtensions: true,
     tryItOutEnabled: true,
     requestInterceptor: (req) => {
-      // Add any request interceptor logic here
       return req;
     },
     responseInterceptor: (res) => {
-      // Add any response interceptor logic here
       return res;
     }
   }

@@ -11,21 +11,16 @@ const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 const cookieParser = require('cookie-parser');
 
-// Set default environment
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development';
 }
 
-// Import utilities
 const logger = require('./utils/logger');
 
-// Import Swagger configuration
 const { specs, swaggerUiOptions } = require('./swagger-config');
 
-// Create Express app
 const app = express();
 
-// Middleware to check database connection
 let isDatabaseConnected = false;
 
 const checkDatabaseConnection = (req, res, next) => {
@@ -39,7 +34,6 @@ const checkDatabaseConnection = (req, res, next) => {
   next();
 };
 
-// Security middleware
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
@@ -48,7 +42,6 @@ app.use(cors({
   credentials: true
 }));
 
-// Rate limiting
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 10,
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS * 800000),
@@ -58,31 +51,24 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Cookie parsing middleware
 app.use(cookieParser());
 
-// Data sanitization
 app.use(mongoSanitize());
 app.use(xss());
 
-// Compression middleware
 app.use(compression());
 
-// Static file serving
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Logging middleware
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
   app.use(morgan('combined'));
 }
 
-// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -96,14 +82,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Swagger API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, swaggerUiOptions));
 app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(specs);
 });
 
-// Import and use routes
 try {
   const authRoutes = require('./routes/auth');
   const userRoutes = require('./routes/users');
@@ -125,10 +109,9 @@ app.use('/api/messages', checkDatabaseConnection, messageRoutes);
 
   logger.info('All routes loaded successfully');
 } catch (error) {
-  logger.error('Error loading routes:', error); // ❗ Show full error
+  logger.error('Error loading routes:', error);
 }
 
-// 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
     status: 'error',
@@ -136,11 +119,9 @@ app.use('*', (req, res) => {
   });
 });
 
-// Global error handler
 const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler.errorHandler);
 
-// Database connection
 try {
   const connectDB = require('./config/database');
   connectDB().then((connected) => {
@@ -164,13 +145,11 @@ const server = app.listen(PORT, () => {
   logger.info(`🚀 DLT TalentHub Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
 });
 
-// Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
   logger.error(`Unhandled Rejection: ${err.message}`);
   server.close(() => process.exit(1));
 });
 
-// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
   logger.error(`Uncaught Exception: ${err.message}`);
   process.exit(1);

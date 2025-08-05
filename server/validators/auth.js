@@ -1,6 +1,5 @@
 const { body, validationResult } = require('express-validator');
 
-// Validation result handler
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -16,7 +15,6 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Register validation
 const validateRegister = [
   body('firstName')
     .trim()
@@ -55,7 +53,6 @@ const validateRegister = [
   handleValidationErrors
 ];
 
-// Login validation
 const validateLogin = [
   body('email')
     .isEmail()
@@ -69,7 +66,6 @@ const validateLogin = [
   handleValidationErrors
 ];
 
-// Password reset request validation
 const validatePasswordResetRequest = [
   body('email')
     .isEmail()
@@ -79,7 +75,6 @@ const validatePasswordResetRequest = [
   handleValidationErrors
 ];
 
-// Password reset validation
 const validatePasswordReset = [
   body('token')
     .notEmpty()
@@ -94,7 +89,6 @@ const validatePasswordReset = [
   handleValidationErrors
 ];
 
-// Change password validation
 const validateChangePassword = [
   body('currentPassword')
     .notEmpty()
@@ -109,7 +103,6 @@ const validateChangePassword = [
   handleValidationErrors
 ];
 
-// Refresh token validation
 const validateRefreshToken = [
   body('refreshToken')
     .notEmpty()

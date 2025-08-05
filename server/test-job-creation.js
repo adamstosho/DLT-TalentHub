@@ -1,10 +1,8 @@
 const axios = require('axios');
 
-// Test job creation with different payloads
 async function testJobCreation() {
   const baseURL = 'http://localhost:5000/api';
   
-  // Test payload 1: Minimal required fields
   const minimalPayload = {
     title: "Test Job",
     description: "This is a test job description with enough characters to meet the minimum requirement.",
@@ -23,7 +21,6 @@ async function testJobCreation() {
     }
   };
 
-  // Test payload 2: Full payload
   const fullPayload = {
     title: "Senior Blockchain Developer",
     description: "We are looking for a senior blockchain developer with experience in Ethereum, Solidity, and smart contract development. The ideal candidate will have at least 3 years of experience in blockchain development and a strong understanding of DeFi protocols.",
@@ -58,7 +55,7 @@ async function testJobCreation() {
     const response = await axios.post(`${baseURL}/jobs`, fullPayload, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer YOUR_TOKEN_HERE' // You'll need to replace this with a valid token
+        'Authorization': 'Bearer YOUR_TOKEN_HERE'
       }
     });
     
@@ -74,5 +71,4 @@ async function testJobCreation() {
   }
 }
 
-// Run the test
 testJobCreation(); 

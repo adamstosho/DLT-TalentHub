@@ -1,12 +1,11 @@
 const nodemailer = require('nodemailer');
 const logger = require('./logger');
 
-// Create transporter
 const createTransporter = () => {
   return nodemailer.createTransporter({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
-    secure: false, // true for 465, false for other ports
+    secure: false,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -14,7 +13,6 @@ const createTransporter = () => {
   });
 };
 
-// Send email function
 const sendEmail = async (to, subject, html, text = '') => {
   try {
     if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -42,7 +40,6 @@ const sendEmail = async (to, subject, html, text = '') => {
   }
 };
 
-// Email templates
 const emailTemplates = {
   welcome: (userName) => ({
     subject: 'Welcome to DLT TalentHub!',

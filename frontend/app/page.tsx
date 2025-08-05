@@ -10,8 +10,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-bg">
       <Header />
-
-      {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary via-primary to-primary/90 text-white py-20 lg:py-32">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,7 +28,6 @@ export default function HomePage() {
                   opportunities in web2, web3, UI/UX, and all technology domains.
                 </p>
               </div>
-
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/register?role=talent">
                   <Button
@@ -51,7 +48,6 @@ export default function HomePage() {
                   </Button>
                 </Link>
               </div>
-
               <div className="flex items-center space-x-8 pt-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-secondary">2,500+</div>
@@ -67,7 +63,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-
             <div className="relative">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
                 <div className="space-y-6">
@@ -80,7 +75,6 @@ export default function HomePage() {
                       <p className="text-gray-300 text-sm">Access Africa's best tech professionals</p>
                     </div>
                   </div>
-
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
                       <Briefcase className="h-6 w-6 text-primary" />
@@ -90,7 +84,6 @@ export default function HomePage() {
                       <p className="text-gray-300 text-sm">Curated jobs from leading companies</p>
                     </div>
                   </div>
-
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
                       <Globe className="h-6 w-6 text-primary" />
@@ -106,8 +99,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
@@ -116,7 +107,6 @@ export default function HomePage() {
               We're more than just a job board. We're building the future of tech talent in Africa.
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
@@ -129,7 +119,6 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
@@ -141,7 +130,6 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
@@ -153,7 +141,6 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
@@ -163,7 +150,6 @@ export default function HomePage() {
                 <CardDescription>Join a thriving community of tech professionals across Africa.</CardDescription>
               </CardHeader>
             </Card>
-
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
@@ -175,7 +161,6 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
@@ -190,76 +175,14 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Statistics Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-primary">Trusted by Thousands</h2>
             <p className="text-xl text-gray-600">Join the growing community of tech professionals and companies</p>
           </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-secondary mb-2">2,500+</div>
-              <div className="text-gray-600 font-medium">Active Talents</div>
-              <div className="text-sm text-gray-500 mt-1">Across 15+ African countries</div>
-            </div>
-
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-secondary mb-2">850+</div>
-              <div className="text-gray-600 font-medium">Jobs Posted</div>
-              <div className="text-sm text-gray-500 mt-1">This month alone</div>
-            </div>
-
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-secondary mb-2">150+</div>
-              <div className="text-gray-600 font-medium">Companies</div>
-              <div className="text-sm text-gray-500 mt-1">From startups to enterprises</div>
-            </div>
-
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-secondary mb-2">95%</div>
-              <div className="text-gray-600 font-medium">Success Rate</div>
-              <div className="text-sm text-gray-500 mt-1">Successful placements</div>
-            </div>
-          </div>
         </div>
       </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="space-y-8">
-            <h2 className="text-3xl lg:text-4xl font-bold">Ready to Transform Your Tech Career?</h2>
-            <p className="text-xl text-gray-200">
-              Join thousands of professionals who have found their dream opportunities through DLT TalentHub.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register?role=talent">
-                <Button
-                  size="lg"
-                  className="bg-secondary text-primary hover:bg-secondary/90 px-8 py-4 text-lg font-semibold"
-                >
-                  Start Your Journey
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/jobs">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-primary px-8 py-4 text-lg font-semibold bg-transparent"
-                >
-                  Browse Jobs
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <Footer />
     </div>
   )

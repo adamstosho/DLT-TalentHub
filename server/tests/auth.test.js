@@ -5,18 +5,15 @@ const User = require('../models/User');
 
 describe('Auth Endpoints', () => {
   beforeAll(async () => {
-    // Connect to test database
     await mongoose.connect(process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/dlt-talenthub-test');
   });
 
   afterAll(async () => {
-    // Clean up and disconnect
     await User.deleteMany({});
     await mongoose.connection.close();
   });
 
   beforeEach(async () => {
-    // Clear users before each test
     await User.deleteMany({});
   });
 
@@ -60,7 +57,6 @@ describe('Auth Endpoints', () => {
 
   describe('POST /api/auth/login', () => {
     beforeEach(async () => {
-      // Create a test user
       const userData = {
         firstName: 'John',
         lastName: 'Doe',

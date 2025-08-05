@@ -1,6 +1,5 @@
 const { body, param, query, validationResult } = require('express-validator');
 
-// Validation result handler
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -16,7 +15,6 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Update talent profile validation
 const validateUpdateTalentProfile = [
   body('skills')
     .optional()
@@ -65,7 +63,7 @@ const validateUpdateTalentProfile = [
     .optional()
     .custom((value) => {
       if (value === '' || value === null || value === undefined) {
-        return true; // Allow empty values for current positions
+        return true;
       }
       if (!Date.parse(value)) {
         throw new Error('End date must be a valid date');
@@ -106,7 +104,7 @@ const validateUpdateTalentProfile = [
     .optional()
     .custom((value) => {
       if (value === '' || value === null || value === undefined) {
-        return true; // Allow empty values for current education
+        return true;
       }
       if (!Date.parse(value)) {
         throw new Error('End date must be a valid date');
@@ -148,7 +146,6 @@ const validateUpdateTalentProfile = [
   handleValidationErrors
 ];
 
-// Search talents validation
 const validateSearchTalents = [
   query('q')
     .optional()
@@ -190,7 +187,6 @@ const validateSearchTalents = [
   handleValidationErrors
 ];
 
-// Get talent by skill validation
 const validateGetTalentBySkill = [
   param('skill')
     .trim()
