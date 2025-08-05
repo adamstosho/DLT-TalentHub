@@ -1,0 +1,49 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1d2039;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d2039;stop-opacity:0.95" />
+    </linearGradient>
+    
+    <linearGradient id="secondaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#33d37d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#33d37d;stop-opacity:0.9" />
+    </linearGradient>
+    
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ade6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00ade6;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main background circle -->
+  <circle cx="16" cy="16" r="15" fill="url(#primaryGradient)"/>
+  
+  <!-- Central hub design -->
+  <g transform="translate(16, 16)">
+    <!-- Main hub circle -->
+    <circle cx="0" cy="0" r="6" fill="url(#secondaryGradient)"/>
+    
+    <!-- Inner hub detail -->
+    <circle cx="0" cy="0" r="3" fill="white" opacity="0.9"/>
+    <circle cx="0" cy="0" r="1.5" fill="url(#secondaryGradient)"/>
+    
+    <!-- Connection lines -->
+    <line x1="-10" y1="-10" x2="-5" y2="-5" stroke="white" stroke-width="1.5" opacity="0.8"/>
+    <line x1="10" y1="-10" x2="5" y2="-5" stroke="white" stroke-width="1.5" opacity="0.8"/>
+    <line x1="-10" y1="10" x2="-5" y2="5" stroke="white" stroke-width="1.5" opacity="0.8"/>
+    <line x1="10" y1="10" x2="5" y2="5" stroke="white" stroke-width="1.5" opacity="0.8"/>
+    
+    <!-- Talent nodes -->
+    <circle cx="-10" cy="-10" r="1.5" fill="white" opacity="0.9"/>
+    <circle cx="10" cy="-10" r="1.5" fill="white" opacity="0.9"/>
+    <circle cx="-10" cy="10" r="1.5" fill="white" opacity="0.9"/>
+    <circle cx="10" cy="10" r="1.5" fill="white" opacity="0.9"/>
+    
+    <!-- Accent nodes -->
+    <circle cx="-7" cy="-7" r="1" fill="url(#accentGradient)" opacity="0.8"/>
+    <circle cx="7" cy="-7" r="1" fill="url(#accentGradient)" opacity="0.8"/>
+    <circle cx="-7" cy="7" r="1" fill="url(#accentGradient)" opacity="0.8"/>
+    <circle cx="7" cy="7" r="1" fill="url(#accentGradient)" opacity="0.8"/>
+  </g>
+</svg> 

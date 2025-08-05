@@ -1,0 +1,43 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1d2039;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d2039;stop-opacity:0.9" />
+    </linearGradient>
+    
+    <linearGradient id="secondaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#33d37d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#33d37d;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ade6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00ade6;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="60" fill="url(#primaryGradient)"/>
+  
+  <!-- User icon -->
+  <g transform="translate(60, 60)">
+    <!-- Head -->
+    <circle cx="0" cy="-15" r="15" fill="url(#secondaryGradient)"/>
+    
+    <!-- Body -->
+    <path d="M-20 0 Q-20 -10 0 -10 Q20 -10 20 0 L20 25 Q20 35 0 35 Q-20 35 -20 25 Z" fill="url(#secondaryGradient)"/>
+    
+    <!-- Arms -->
+    <rect x="-25" y="5" width="8" height="20" fill="url(#secondaryGradient)" rx="4"/>
+    <rect x="17" y="5" width="8" height="20" fill="url(#secondaryGradient)" rx="4"/>
+    
+    <!-- Legs -->
+    <rect x="-12" y="35" width="8" height="20" fill="url(#accentGradient)" rx="4"/>
+    <rect x="4" y="35" width="8" height="20" fill="url(#accentGradient)" rx="4"/>
+  </g>
+  
+  <!-- Initial letter -->
+  <text x="60" y="75" font-family="'Poppins', sans-serif" font-size="24" font-weight="700" fill="white" text-anchor="middle">
+    U
+  </text>
+</svg> 

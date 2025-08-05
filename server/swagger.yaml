@@ -1,0 +1,3142 @@
+openapi: 3.0.3
+info:
+  title: DLT TalentHub API
+  description: |
+    Backend API for DLT TalentHub - connecting talents with job opportunities in the DLT Africa ecosystem.
+    
+    ## Overview
+    This API provides endpoints for user authentication, talent management, job postings, recruitment, and administrative functions.
+    
+    ## Authentication
+    Most endpoints require authentication using JWT Bearer tokens. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+    
+    ## Rate Limiting
+    API requests are rate-limited to 100 requests per 15 minutes per IP address.
+    
+    ## Error Responses
+    All error responses follow a consistent format:
+    ```json
+    {
+      "status": "error",
+      "message": "Error description",
+      "errors": ["Detailed error messages"]
+    }
+    ```
+  version: 1.0.0
+  contact:
+    name: DLT TalentHub Team
+    email: support@dlt-talenthub.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5000
+    description: Development server
+  - url: https://api.dlt-talenthub.com
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Check if the server is running and healthy
+      tags: [System]
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: DLT TalentHub Server is running
+                  timestamp:
+                    type: string
+                    format: date-time
+                  environment:
+                    type: string
+                    example: development
+
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      description: Create a new user account with the specified role
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      summary: Login user
+      description: Authenticate user and return JWT tokens
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      summary: Logout user
+      description: Invalidate the current user session
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  /api/auth/refresh:
+    post:
+      summary: Refresh access token
+      description: Get a new access token using a valid refresh token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                      refreshToken:
+                        type: string
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/forgot-password:
+    post:
+      summary: Request password reset
+      description: Send a password reset email to the user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+      responses:
+        '200':
+          description: Password reset email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Password reset email sent
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/reset-password:
+    post:
+      summary: Reset password with token
+      description: Reset user password using a valid reset token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - password
+              properties:
+                token:
+                  type: string
+                  description: Password reset token
+                password:
+                  type: string
+                  minLength: 8
+                  description: New password
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Password reset successfully
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/change-password:
+    post:
+      summary: Change password (authenticated user)
+      description: Change password for the currently authenticated user
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+              properties:
+                currentPassword:
+                  type: string
+                  description: Current password
+                newPassword:
+                  type: string
+                  minLength: 8
+                  description: New password
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Password changed successfully
+        '401':
+          description: Current password incorrect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/me:
+    get:
+      summary: Get current user profile
+      description: Retrieve the profile of the currently authenticated user
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/users/profile:
+    put:
+      summary: Update user profile
+      description: Update the profile of the currently authenticated user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  minLength: 2
+                  maxLength: 50
+                lastName:
+                  type: string
+                  minLength: 2
+                  maxLength: 50
+                bio:
+                  type: string
+                  maxLength: 500
+                location:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/users/avatar:
+    post:
+      summary: Upload user avatar
+      description: Upload a new avatar image for the current user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: Avatar image file (JPG, PNG, GIF)
+      responses:
+        '200':
+          description: Avatar uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      avatar:
+                        type: string
+                        description: URL to the uploaded avatar
+        '400':
+          description: Invalid file format or size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete user avatar
+      description: Remove the current user's avatar
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Avatar deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Avatar deleted successfully
+
+  /api/users/search:
+    get:
+      summary: Search users
+      description: Search for users with optional filters
+      tags: [Users]
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Search query for name or email
+        - in: query
+          name: role
+          schema:
+            type: string
+            enum: [talent, recruiter, admin]
+          description: Filter by user role
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/users/{userId}:
+    get:
+      summary: Get user profile by ID
+      description: Retrieve a user's profile by their ID
+      tags: [Users]
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: User ID
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/talents/profile:
+    get:
+      summary: Get current user's talent profile
+      description: Retrieve the talent profile of the currently authenticated user
+      tags: [Talents]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Talent profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Talent'
+        '404':
+          description: Talent profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update talent profile
+      description: Update the talent profile of the currently authenticated user
+      tags: [Talents]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalentUpdateRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Talent'
+        '401':
+          description: Not authenticated or not a talent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/talents/cv:
+    post:
+      summary: Upload CV
+      description: Upload a CV document for the current talent
+      tags: [Talents]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                cv:
+                  type: string
+                  format: binary
+                  description: CV document (PDF, DOC, DOCX)
+      responses:
+        '200':
+          description: CV uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      cv:
+                        type: string
+                        description: URL to the uploaded CV
+        '400':
+          description: Invalid file format or size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete CV
+      description: Remove the current talent's CV
+      tags: [Talents]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: CV deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: CV deleted successfully
+
+  /api/talents/search:
+    get:
+      summary: Search talents
+      description: Search for talents with various filters
+      tags: [Talents]
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Search query for name or skills
+        - in: query
+          name: skills
+          schema:
+            type: string
+          description: Filter by skills (comma-separated)
+        - in: query
+          name: location
+          schema:
+            type: string
+          description: Filter by location
+        - in: query
+          name: availability
+          schema:
+            type: string
+            enum: [available, busy, unavailable]
+          description: Filter by availability status
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      talents:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Talent'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/talents/skills/{skillName}:
+    get:
+      summary: Find talents by skill
+      description: Find all talents who have a specific skill
+      tags: [Talents]
+      parameters:
+        - in: path
+          name: skillName
+          required: true
+          schema:
+            type: string
+          description: Skill name to search for
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: Talents with the specified skill
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      talents:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Talent'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/talents/available:
+    get:
+      summary: Get available talents
+      description: Get a list of talents who are currently available for work
+      tags: [Talents]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of available talents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      talents:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Talent'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/talents/{talentId}:
+    get:
+      summary: Get talent profile by ID
+      description: Retrieve a talent's profile by their ID
+      tags: [Talents]
+      parameters:
+        - in: path
+          name: talentId
+          required: true
+          schema:
+            type: string
+          description: Talent ID
+      responses:
+        '200':
+          description: Talent profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Talent'
+        '404':
+          description: Talent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/recruiters/dashboard:
+    get:
+      summary: Get recruiter dashboard data
+      description: Get dashboard statistics and data for the current recruiter
+      tags: [Recruiters]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/RecruiterDashboard'
+        '401':
+          description: Not authenticated or not a recruiter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/recruiters/jobs:
+    get:
+      summary: Get jobs posted by the recruiter
+      description: Get all jobs posted by the current recruiter
+      tags: [Recruiters]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, draft, paused, closed]
+          description: Filter by job status
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of recruiter's jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      jobs:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Job'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/recruiters/applications:
+    get:
+      summary: Get all applications for recruiter's jobs
+      description: Get all job applications for jobs posted by the current recruiter
+      tags: [Recruiters]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, reviewed, shortlisted, interviewed, offered, accepted, rejected]
+          description: Filter by application status
+        - in: query
+          name: jobId
+          schema:
+            type: string
+          description: Filter by specific job ID
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      applications:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Application'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/recruiters/stats:
+    get:
+      summary: Get recruiter statistics
+      description: Get statistics and metrics for the current recruiter
+      tags: [Recruiters]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Recruiter statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/RecruiterStats'
+
+  /api/recruiters/search-talents:
+    get:
+      summary: Search talents for a specific job
+      description: Search for talents that match the requirements of a specific job
+      tags: [Recruiters]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: jobId
+          schema:
+            type: string
+          description: Job ID to find matching talents for
+        - in: query
+          name: skills
+          schema:
+            type: string
+          description: Required skills (comma-separated)
+        - in: query
+          name: experience
+          schema:
+            type: number
+            minimum: 0
+          description: Minimum years of experience
+        - in: query
+          name: location
+          schema:
+            type: string
+          description: Preferred location
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: Matching talents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      talents:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Talent'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/jobs:
+    post:
+      summary: Create a new job posting
+      description: Create a new job posting (recruiters and admins only)
+      tags: [Jobs]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCreateRequest'
+      responses:
+        '201':
+          description: Job created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Job'
+        '401':
+          description: Not authenticated or not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Get all jobs
+      description: Get a paginated list of all active jobs
+      tags: [Jobs]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, draft, paused, closed]
+          description: Filter by job status
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [full-time, part-time, contract, freelance, internship]
+          description: Filter by job type
+      responses:
+        '200':
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      jobs:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Job'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/jobs/search:
+    get:
+      summary: Search jobs
+      description: Search for jobs with various filters
+      tags: [Jobs]
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Search query for job title or description
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter by job category
+        - in: query
+          name: location
+          schema:
+            type: string
+          description: Filter by location
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [full-time, part-time, contract, freelance, internship]
+          description: Filter by job type
+        - in: query
+          name: skills
+          schema:
+            type: string
+          description: Filter by required skills (comma-separated)
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      jobs:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Job'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/jobs/category/{category}:
+    get:
+      summary: Get jobs by category
+      description: Get all jobs in a specific category
+      tags: [Jobs]
+      parameters:
+        - in: path
+          name: category
+          required: true
+          schema:
+            type: string
+          description: Job category
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: Jobs in the specified category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      jobs:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Job'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/jobs/urgent:
+    get:
+      summary: Get urgent jobs
+      description: Get a list of urgent job postings
+      tags: [Jobs]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of urgent jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      jobs:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Job'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/jobs/featured:
+    get:
+      summary: Get featured jobs
+      description: Get a list of featured job postings
+      tags: [Jobs]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of featured jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      jobs:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Job'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/jobs/{jobId}:
+    get:
+      summary: Get job by ID
+      description: Retrieve a specific job by its ID
+      tags: [Jobs]
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      responses:
+        '200':
+          description: Job details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Job'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update job
+      description: Update a job posting (job owner or admin only)
+      tags: [Jobs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobUpdateRequest'
+      responses:
+        '200':
+          description: Job updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Job'
+        '403':
+          description: Not authorized to update this job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete job
+      description: Delete a job posting (job owner or admin only)
+      tags: [Jobs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      responses:
+        '200':
+          description: Job deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Job deleted successfully
+        '403':
+          description: Not authorized to delete this job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/jobs/{jobId}/apply:
+    post:
+      summary: Apply to a job
+      description: Submit a job application (talents only)
+      tags: [Jobs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobApplicationRequest'
+      responses:
+        '201':
+          description: Application submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Application'
+        '400':
+          description: Already applied or job not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/jobs/{jobId}/applications:
+    get:
+      summary: Get applications for a job
+      description: Get all applications for a specific job (job owner or admin only)
+      tags: [Jobs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job ID
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, reviewed, shortlisted, interviewed, offered, accepted, rejected]
+          description: Filter by application status
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      applications:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Application'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+        '403':
+          description: Not authorized to view applications
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/jobs/applications/{applicationId}/status:
+    put:
+      summary: Update application status
+      description: Update the status of a job application (job owner or admin only)
+      tags: [Jobs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: applicationId
+          required: true
+          schema:
+            type: string
+          description: Application ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [pending, reviewed, shortlisted, interviewed, offered, accepted, rejected]
+                  description: New application status
+                notes:
+                  type: string
+                  description: Optional notes about the status change
+      responses:
+        '200':
+          description: Application status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Application'
+        '403':
+          description: Not authorized to update this application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/dashboard:
+    get:
+      summary: Get admin dashboard data
+      description: Get comprehensive dashboard data for administrators
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Admin dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/AdminDashboard'
+        '401':
+          description: Not authenticated or not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/users:
+    get:
+      summary: Get all users
+      description: Get a paginated list of all users in the system
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: role
+          schema:
+            type: string
+            enum: [talent, recruiter, admin]
+          description: Filter by user role
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, inactive]
+          description: Filter by user status
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/admin/users/{userId}/status:
+    put:
+      summary: Update user status
+      description: Activate or deactivate a user account
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isActive
+              properties:
+                isActive:
+                  type: boolean
+                  description: Whether to activate or deactivate the user
+      responses:
+        '200':
+          description: User status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  /api/admin/users/{userId}:
+    delete:
+      summary: Delete user
+      description: Permanently delete a user account
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: User ID
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User deleted successfully
+
+  /api/admin/jobs:
+    get:
+      summary: Get all jobs
+      description: Get a paginated list of all jobs in the system
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, draft, paused, closed]
+          description: Filter by job status
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of all jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      jobs:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Job'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/admin/jobs/{jobId}/status:
+    put:
+      summary: Update job status
+      description: Update the status of a job posting
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [active, draft, paused, closed]
+                  description: New job status
+      responses:
+        '200':
+          description: Job status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Job'
+
+  /api/admin/jobs/{jobId}:
+    delete:
+      summary: Delete job
+      description: Permanently delete a job posting
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      responses:
+        '200':
+          description: Job deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Job deleted successfully
+
+  /api/admin/stats:
+    get:
+      summary: Get admin statistics
+      description: Get comprehensive statistics for the platform
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Admin statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/AdminStats'
+
+  /api/admin/metrics:
+    get:
+      summary: Get system metrics
+      description: Get system performance and usage metrics
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: System metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/SystemMetrics'
+
+  /api/admin/notifications:
+    get:
+      summary: Get system notifications
+      description: Get system-wide notifications and alerts
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+          description: Filter by notification type
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: System notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      notifications:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Notification'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/notifications:
+    get:
+      summary: Get user notifications
+      description: Get notifications for the current user
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+          description: Filter by notification type
+        - in: query
+          name: isRead
+          schema:
+            type: boolean
+          description: Filter by read status
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      notifications:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Notification'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/notifications/unread-count:
+    get:
+      summary: Get unread notification count
+      description: Get the count of unread notifications for the current user
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Unread notification count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                        description: Number of unread notifications
+
+  /api/notifications/{notificationId}/read:
+    put:
+      summary: Mark notification as read
+      description: Mark a specific notification as read
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: notificationId
+          required: true
+          schema:
+            type: string
+          description: Notification ID
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Notification'
+
+  /api/notifications/mark-all-read:
+    put:
+      summary: Mark all notifications as read
+      description: Mark all notifications for the current user as read
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All notifications marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: All notifications marked as read
+
+  /api/notifications/{notificationId}:
+    delete:
+      summary: Delete notification
+      description: Delete a specific notification
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: notificationId
+          required: true
+          schema:
+            type: string
+          description: Notification ID
+      responses:
+        '200':
+          description: Notification deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Notification deleted successfully
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login endpoint
+
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: User ID
+        firstName:
+          type: string
+          description: User's first name
+        lastName:
+          type: string
+          description: User's last name
+        email:
+          type: string
+          format: email
+          description: User's email address
+        role:
+          type: string
+          enum: [talent, recruiter, admin]
+          description: User's role
+        phone:
+          type: string
+          description: User's phone number
+        bio:
+          type: string
+          description: User's bio
+        location:
+          type: string
+          description: User's location
+        avatar:
+          type: string
+          description: URL to user's avatar image
+        isActive:
+          type: boolean
+          description: Whether the user account is active
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RegisterRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
+        - role
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: User's first name
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: User's last name
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          minLength: 8
+          description: User's password
+        role:
+          type: string
+          enum: [talent, recruiter, admin]
+          description: User's role
+        phone:
+          type: string
+          description: User's phone number
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          description: User's password
+
+    AuthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: Authentication successful
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            accessToken:
+              type: string
+              description: JWT access token
+            refreshToken:
+              type: string
+              description: JWT refresh token
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+          description: Error message
+        errors:
+          type: array
+          items:
+            type: string
+          description: Detailed error messages
+
+    Talent:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Talent ID
+        userId:
+          type: string
+          description: Associated user ID
+        skills:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Skill name
+              level:
+                type: string
+                enum: [beginner, intermediate, advanced, expert]
+                description: Skill proficiency level
+              yearsOfExperience:
+                type: number
+                minimum: 0
+                description: Years of experience with this skill
+        experience:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+                description: Job title
+              company:
+                type: string
+                description: Company name
+              startDate:
+                type: string
+                format: date
+                description: Start date
+              endDate:
+                type: string
+                format: date
+                description: End date (null if current)
+              description:
+                type: string
+                description: Job description
+        education:
+          type: array
+          items:
+            type: object
+            properties:
+              degree:
+                type: string
+                description: Degree name
+              institution:
+                type: string
+                description: Institution name
+              field:
+                type: string
+                description: Field of study
+              graduationYear:
+                type: integer
+                description: Graduation year
+        availability:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [available, busy, unavailable]
+              description: Availability status
+            startDate:
+              type: string
+              format: date
+              description: Available start date
+            endDate:
+              type: string
+              format: date
+              description: Available end date
+            hoursPerWeek:
+              type: number
+              minimum: 0
+              maximum: 168
+              description: Hours available per week
+        salary:
+          type: object
+          properties:
+            min:
+              type: number
+              minimum: 0
+              description: Minimum expected salary
+            max:
+              type: number
+              minimum: 0
+              description: Maximum expected salary
+            currency:
+              type: string
+              default: USD
+              description: Salary currency
+        cv:
+          type: string
+          description: URL to CV document
+        profileViews:
+          type: integer
+          minimum: 0
+          description: Number of profile views
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TalentUpdateRequest:
+      type: object
+      properties:
+        skills:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Skill name
+              level:
+                type: string
+                enum: [beginner, intermediate, advanced, expert]
+                description: Skill proficiency level
+              yearsOfExperience:
+                type: number
+                minimum: 0
+                description: Years of experience with this skill
+        experience:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+                description: Job title
+              company:
+                type: string
+                description: Company name
+              startDate:
+                type: string
+                format: date
+                description: Start date
+              endDate:
+                type: string
+                format: date
+                description: End date (null if current)
+              description:
+                type: string
+                description: Job description
+        education:
+          type: array
+          items:
+            type: object
+            properties:
+              degree:
+                type: string
+                description: Degree name
+              institution:
+                type: string
+                description: Institution name
+              field:
+                type: string
+                description: Field of study
+              graduationYear:
+                type: integer
+                description: Graduation year
+        availability:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [available, busy, unavailable]
+              description: Availability status
+            startDate:
+              type: string
+              format: date
+              description: Available start date
+            endDate:
+              type: string
+              format: date
+              description: Available end date
+            hoursPerWeek:
+              type: number
+              minimum: 0
+              maximum: 168
+              description: Hours available per week
+        salary:
+          type: object
+          properties:
+            min:
+              type: number
+              minimum: 0
+              description: Minimum expected salary
+            max:
+              type: number
+              minimum: 0
+              description: Maximum expected salary
+            currency:
+              type: string
+              default: USD
+              description: Salary currency
+
+    Job:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Job ID
+        title:
+          type: string
+          description: Job title
+        description:
+          type: string
+          description: Job description
+        company:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Company name
+            logo:
+              type: string
+              description: Company logo URL
+            website:
+              type: string
+              format: uri
+              description: Company website
+        type:
+          type: string
+          enum: [full-time, part-time, contract, freelance, internship]
+          description: Job type
+        category:
+          type: string
+          description: Job category
+        skills:
+          type: array
+          items:
+            type: string
+          description: Required skills
+        requirements:
+          type: array
+          items:
+            type: string
+          description: Job requirements
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+              description: City
+            country:
+              type: string
+              description: Country
+            remote:
+              type: boolean
+              description: Whether remote work is allowed
+        salary:
+          type: object
+          properties:
+            min:
+              type: number
+              minimum: 0
+              description: Minimum salary
+            max:
+              type: number
+              minimum: 0
+              description: Maximum salary
+            currency:
+              type: string
+              default: USD
+              description: Salary currency
+        status:
+          type: string
+          enum: [active, draft, paused, closed]
+          description: Job status
+        isUrgent:
+          type: boolean
+          description: Whether job is urgent
+        isFeatured:
+          type: boolean
+          description: Whether job is featured
+        recruiterId:
+          type: string
+          description: ID of the recruiter who posted the job
+        views:
+          type: integer
+          minimum: 0
+          description: Number of job views
+        applications:
+          type: integer
+          minimum: 0
+          description: Number of applications
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    JobCreateRequest:
+      type: object
+      required:
+        - title
+        - description
+        - company
+        - type
+        - category
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 200
+          description: Job title
+        description:
+          type: string
+          minLength: 50
+          maxLength: 5000
+          description: Job description
+        company:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: Company name
+            logo:
+              type: string
+              format: uri
+              description: Company logo URL
+            website:
+              type: string
+              format: uri
+              description: Company website
+        type:
+          type: string
+          enum: [full-time, part-time, contract, freelance, internship]
+          description: Job type
+        category:
+          type: string
+          description: Job category
+        skills:
+          type: array
+          items:
+            type: string
+          description: Required skills
+        requirements:
+          type: array
+          items:
+            type: string
+          description: Job requirements
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+              description: City
+            country:
+              type: string
+              description: Country
+            remote:
+              type: boolean
+              description: Whether remote work is allowed
+        salary:
+          type: object
+          properties:
+            min:
+              type: number
+              minimum: 0
+              description: Minimum salary
+            max:
+              type: number
+              minimum: 0
+              description: Maximum salary
+            currency:
+              type: string
+              default: USD
+              description: Salary currency
+        isUrgent:
+          type: boolean
+          description: Whether job is urgent
+        isFeatured:
+          type: boolean
+          description: Whether job is featured
+
+    JobUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 200
+          description: Job title
+        description:
+          type: string
+          minLength: 50
+          maxLength: 5000
+          description: Job description
+        company:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Company name
+            logo:
+              type: string
+              format: uri
+              description: Company logo URL
+            website:
+              type: string
+              format: uri
+              description: Company website
+        type:
+          type: string
+          enum: [full-time, part-time, contract, freelance, internship]
+          description: Job type
+        category:
+          type: string
+          description: Job category
+        skills:
+          type: array
+          items:
+            type: string
+          description: Required skills
+        requirements:
+          type: array
+          items:
+            type: string
+          description: Job requirements
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+              description: City
+            country:
+              type: string
+              description: Country
+            remote:
+              type: boolean
+              description: Whether remote work is allowed
+        salary:
+          type: object
+          properties:
+            min:
+              type: number
+              minimum: 0
+              description: Minimum salary
+            max:
+              type: number
+              minimum: 0
+              description: Maximum salary
+            currency:
+              type: string
+              default: USD
+              description: Salary currency
+        status:
+          type: string
+          enum: [active, draft, paused, closed]
+          description: Job status
+        isUrgent:
+          type: boolean
+          description: Whether job is urgent
+        isFeatured:
+          type: boolean
+          description: Whether job is featured
+
+    JobApplicationRequest:
+      type: object
+      properties:
+        coverLetter:
+          type: string
+          maxLength: 2000
+          description: Cover letter
+        expectedSalary:
+          type: object
+          properties:
+            amount:
+              type: number
+              minimum: 0
+              description: Expected salary amount
+            currency:
+              type: string
+              default: USD
+              description: Salary currency
+        availability:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date
+              description: Available start date
+            hoursPerWeek:
+              type: number
+              minimum: 0
+              maximum: 168
+              description: Hours available per week
+
+    Application:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Application ID
+        jobId:
+          type: string
+          description: Job ID
+        talentId:
+          type: string
+          description: Talent ID
+        status:
+          type: string
+          enum: [pending, reviewed, shortlisted, interviewed, offered, accepted, rejected]
+          description: Application status
+        coverLetter:
+          type: string
+          description: Cover letter
+        expectedSalary:
+          type: object
+          properties:
+            amount:
+              type: number
+              minimum: 0
+              description: Expected salary amount
+            currency:
+              type: string
+              description: Salary currency
+        availability:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date
+              description: Available start date
+            hoursPerWeek:
+              type: number
+              minimum: 0
+              maximum: 168
+              description: Hours available per week
+        notes:
+          type: string
+          description: Recruiter notes
+        appliedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Notification:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Notification ID
+        userId:
+          type: string
+          description: User ID
+        type:
+          type: string
+          description: Notification type
+        title:
+          type: string
+          description: Notification title
+        message:
+          type: string
+          description: Notification message
+        data:
+          type: object
+          description: Additional notification data
+        isRead:
+          type: boolean
+          description: Whether notification is read
+        createdAt:
+          type: string
+          format: date-time
+
+    RecruiterDashboard:
+      type: object
+      properties:
+        totalJobs:
+          type: integer
+          minimum: 0
+          description: Total jobs posted
+        activeJobs:
+          type: integer
+          minimum: 0
+          description: Active jobs
+        totalApplications:
+          type: integer
+          minimum: 0
+          description: Total applications received
+        pendingApplications:
+          type: integer
+          minimum: 0
+          description: Pending applications
+        recentJobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Job'
+          description: Recent job postings
+        recentApplications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
+          description: Recent applications
+
+    RecruiterStats:
+      type: object
+      properties:
+        totalJobs:
+          type: integer
+          minimum: 0
+          description: Total jobs posted
+        activeJobs:
+          type: integer
+          minimum: 0
+          description: Active jobs
+        totalApplications:
+          type: integer
+          minimum: 0
+          description: Total applications received
+        applicationsByStatus:
+          type: object
+          properties:
+            pending:
+              type: integer
+              minimum: 0
+            reviewed:
+              type: integer
+              minimum: 0
+            shortlisted:
+              type: integer
+              minimum: 0
+            interviewed:
+              type: integer
+              minimum: 0
+            offered:
+              type: integer
+              minimum: 0
+            accepted:
+              type: integer
+              minimum: 0
+            rejected:
+              type: integer
+              minimum: 0
+        averageResponseTime:
+          type: number
+          minimum: 0
+          description: Average response time in hours
+
+    AdminDashboard:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+          minimum: 0
+          description: Total users
+        totalJobs:
+          type: integer
+          minimum: 0
+          description: Total jobs
+        totalApplications:
+          type: integer
+          minimum: 0
+          description: Total applications
+        usersByRole:
+          type: object
+          properties:
+            talent:
+              type: integer
+              minimum: 0
+            recruiter:
+              type: integer
+              minimum: 0
+            admin:
+              type: integer
+              minimum: 0
+        jobsByStatus:
+          type: object
+          properties:
+            active:
+              type: integer
+              minimum: 0
+            draft:
+              type: integer
+              minimum: 0
+            paused:
+              type: integer
+              minimum: 0
+            closed:
+              type: integer
+              minimum: 0
+        recentActivity:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Activity type
+              description:
+                type: string
+                description: Activity description
+              timestamp:
+                type: string
+                format: date-time
+                description: Activity timestamp
+
+    AdminStats:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+          minimum: 0
+          description: Total users
+        totalJobs:
+          type: integer
+          minimum: 0
+          description: Total jobs
+        totalApplications:
+          type: integer
+          minimum: 0
+          description: Total applications
+        usersByRole:
+          type: object
+          properties:
+            talent:
+              type: integer
+              minimum: 0
+            recruiter:
+              type: integer
+              minimum: 0
+            admin:
+              type: integer
+              minimum: 0
+        jobsByStatus:
+          type: object
+          properties:
+            active:
+              type: integer
+              minimum: 0
+            draft:
+              type: integer
+              minimum: 0
+            paused:
+              type: integer
+              minimum: 0
+            closed:
+              type: integer
+              minimum: 0
+        applicationsByStatus:
+          type: object
+          properties:
+            pending:
+              type: integer
+              minimum: 0
+            reviewed:
+              type: integer
+              minimum: 0
+            shortlisted:
+              type: integer
+              minimum: 0
+            interviewed:
+              type: integer
+              minimum: 0
+            offered:
+              type: integer
+              minimum: 0
+            accepted:
+              type: integer
+              minimum: 0
+            rejected:
+              type: integer
+              minimum: 0
+        growthMetrics:
+          type: object
+          properties:
+            newUsersThisMonth:
+              type: integer
+              minimum: 0
+            newJobsThisMonth:
+              type: integer
+              minimum: 0
+            newApplicationsThisMonth:
+              type: integer
+              minimum: 0
+
+    SystemMetrics:
+      type: object
+      properties:
+        serverUptime:
+          type: number
+          minimum: 0
+          description: Server uptime in seconds
+        memoryUsage:
+          type: object
+          properties:
+            used:
+              type: number
+              minimum: 0
+              description: Used memory in MB
+            total:
+              type: number
+              minimum: 0
+              description: Total memory in MB
+            percentage:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: Memory usage percentage
+        cpuUsage:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: CPU usage percentage
+        activeConnections:
+          type: integer
+          minimum: 0
+          description: Active database connections
+        requestRate:
+          type: number
+          minimum: 0
+          description: Requests per minute
+        errorRate:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Error rate percentage
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Current page number
+        limit:
+          type: integer
+          minimum: 1
+          description: Number of items per page
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of items
+        pages:
+          type: integer
+          minimum: 0
+          description: Total number of pages
+        hasNext:
+          type: boolean
+          description: Whether there is a next page
+        hasPrev:
+          type: boolean
+          description: Whether there is a previous page
+
+tags:
+  - name: System
+    description: System health and status endpoints
+  - name: Authentication
+    description: User authentication and authorization endpoints
+  - name: Users
+    description: User profile management endpoints
+  - name: Talents
+    description: Talent profile and search endpoints
+  - name: Recruiters
+    description: Recruiter dashboard and management endpoints
+  - name: Jobs
+    description: Job posting and application endpoints
+  - name: Admin
+    description: Administrative and system management endpoints
+  - name: Notifications
+    description: User notification management endpoints 

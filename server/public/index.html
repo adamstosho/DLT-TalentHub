@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLT TalentHub API Documentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            margin: 20px;
+        }
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        .description {
+            color: #34495e;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .feature {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .feature h3 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+        }
+        .feature p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚀 DLT TalentHub</div>
+        <div class="subtitle">API Documentation Portal</div>
+        <div class="description">
+            Welcome to the DLT TalentHub API documentation. This comprehensive API provides endpoints for user authentication, talent management, job postings, recruitment, and administrative functions.
+        </div>
+        
+        <a href="/api-docs" class="btn">📖 View API Documentation</a>
+        <a href="/api-docs.json" class="btn">📄 Download OpenAPI Spec</a>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🔐 Authentication</h3>
+                <p>JWT-based authentication with role-based access control</p>
+            </div>
+            <div class="feature">
+                <h3>👥 User Management</h3>
+                <p>Complete user profile management and role-based permissions</p>
+            </div>
+            <div class="feature">
+                <h3>💼 Job Management</h3>
+                <p>Create, update, and manage job postings with applications</p>
+            </div>
+            <div class="feature">
+                <h3>🎯 Talent Search</h3>
+                <p>Advanced talent search with filtering and matching</p>
+            </div>
+            <div class="feature">
+                <h3>📊 Analytics</h3>
+                <p>Comprehensive dashboard and reporting features</p>
+            </div>
+            <div class="feature">
+                <h3>🔔 Notifications</h3>
+                <p>Real-time notification system for users</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
